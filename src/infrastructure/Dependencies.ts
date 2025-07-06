@@ -5,10 +5,13 @@ import { CrearLeccionUseCase } from "../application/UseCases/CrearLeccionUseCase
 import { ResolverEjercicioUseCase } from "../application/UseCases/ResolverEjercicioUseCase";
 import { ServicioDeEvaluacionImpl } from "../domain/Services/ServicioDeEvaluacion";
 import { ServicioDeProgresoImpl } from "../domain/Services/ServicioDeProgreso";
+import { SagaCompensationServiceImpl } from "../domain/Services/SagaCompensationService";
 import { KafkaEventPublisher } from "./Adapters/KafkaEventPublisher";
 import { TypeOrmEjercicioRepository } from "./Adapters/TypeOrmEjercicioRepository";
 import { TypeOrmLeccionRepository } from "./Adapters/TypeOrmLeccionRepository";
 import { TypeOrmRespuestaUsuarioRepository } from "./Adapters/TypeOrmRespuestaUsuarioRepository";
+import { SagaEventHandler } from "./Adapters/SagaEventHandler";
+import { KafkaClient } from "./kafka/KafkaClient";
 import { LeccionController } from "./HTTP/Controllers/LeccionControlle";
 import { database } from "../Config/db/connect";
 import { ObtenerLeccionUseCase } from "../application/UseCases/ObtenerLeccionUseCase";
@@ -29,7 +32,7 @@ dotenv.config();
 
 const dataSource = database.getDataSource();
 
-if (!process.env.CLIENT_ID || !process.env.BROKER) {
+if (!process.env.CLIENT_KAFKA_ID || !process.env.BROKER) {
   throw new Error("Credenciales de Kafka nulas");
 }
 
@@ -49,6 +52,16 @@ const respuestaRepository = new TypeOrmRespuestaUsuarioRepository(dataSource);
 
 const servicioEvaluacion = new ServicioDeEvaluacionImpl();
 const servicioProgreso = new ServicioDeProgresoImpl(respuestaRepository);
+
+const sagaCompensationService = new SagaCompensationServiceImpl(
+  ejercicioRepository,
+  leccionRepository,
+  respuestaRepository,
+  eventPublisher
+);
+
+const kafkaClient = new KafkaClient([process.env.BROKER || 'localhost:9092']);
+const sagaEventHandler = new SagaEventHandler(kafkaClient, sagaCompensationService);
 
 const crearLeccionUseCase = new CrearLeccionUseCase(
   leccionRepository,
@@ -97,7 +110,6 @@ const obtenerEstadisticasLeccionUseCase = new ObtenerEstadisticasLeccionUseCase(
   respuestaRepository
 );
 
-// Controllers
 export const leccionController = new LeccionController(
   crearLeccionUseCase,
   resolverEjercicioUseCase,
@@ -122,3 +134,5 @@ export const usuarioController = new UsuarioController(
   obtenerRespuestasUsuarioUseCase,
   obtenerEstadisticasLeccionUseCase
 );
+
+export { sagaEventHandler };

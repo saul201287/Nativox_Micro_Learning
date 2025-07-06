@@ -2,12 +2,16 @@ import { app } from "./cmd/Server";
 import helmet from "helmet";
 import { Signale } from "signale";
 import { database } from "./Config/db/connect";
-import { eventPublisher } from "./infrastructure/Dependencies";
+import { eventPublisher, sagaEventHandler } from "./infrastructure/Dependencies";
 
 async function bootstrap() {
   try {
     await database.connect();
     const dataSource = database.getDataSource();
+
+    // Iniciar SAGA Event Handler
+    await sagaEventHandler.startListening();
+    console.log("[SAGA] Event handler iniciado correctamente");
 
     app.use(helmet.hidePoweredBy());
     app.use(
@@ -23,6 +27,7 @@ async function bootstrap() {
         status: "ok",
         service: "aprendizaje-service",
         database: dataSource.isInitialized ? "connected" : "disconnected",
+        saga: "active",
       });
     });
 
@@ -41,6 +46,7 @@ async function bootstrap() {
 
       server.close(async () => {
         try {
+          await sagaEventHandler.stopListening();
           await eventPublisher.disconnect();
           await database.disconnect();
           console.log("Servidor cerrado exitosamente");

@@ -1,9 +1,14 @@
-import { ProgresoActualizadoEvent } from "../../domain/Events/DomainEvent";
+import { ProgresoActualizado } from "../../domain/Events/DomainEvent";
+import { 
+  ProgresoActualizadoSagaStarted,
+  ProgresoActualizadoSagaCompleted,
+  ProgresoActualizadoSagaFailed
+} from "../../domain/Events/SagaEvents";
 import { EventPublisher } from "../../domain/Ports/EventPublisher";
 import { LeccionRepository } from "../../domain/Ports/LeccionRepository";
 import { RespuestaUsuarioRepository } from "../../domain/Ports/RespuestaUsuarioRepository";
 import { ServicioDeProgreso } from "../../domain/Services/ServicioDeProgreso";
-import { ActualizarProgresoCommand } from "../Commands/QueriesLectura";
+import { ActualizarProgresoCommand } from "../Commands/CommandsEscritura";
 
 export class ActualizarProgresoUseCase {
   constructor(
@@ -14,47 +19,71 @@ export class ActualizarProgresoUseCase {
   ) {}
 
   async execute(command: ActualizarProgresoCommand): Promise<void> {
-    // Buscar lección
-    const leccion = await this.leccionRepository.findById(command.leccionId);
-    if (!leccion) {
-      throw new Error(`Lección no encontrada: ${command.leccionId}`);
-    }
+    const sagaId = crypto.randomUUID();
+    
+    try {
+      await this.eventPublisher.publish(
+        new ProgresoActualizadoSagaStarted(
+          command.leccionId,
+          command.usuarioId,
+          command.leccionId,
+          sagaId
+        )
+      );
 
-    // Obtener respuestas del usuario para esta lección
-    const respuestasUsuario = await this.respuestaRepository.findByUsuarioId(
-      command.usuarioId
-    );
-    const respuestasLeccion = respuestasUsuario.filter((r) =>
-      leccion.getEjercicios().some((ej) => ej.getId() === r.getEjercicioId())
-    );
-
-    // Calcular progreso
-    const respuestasCorrectas = respuestasLeccion.filter((r) =>
-      r.getResultado().esCorrecta()
-    ).length;
-
-    const totalEjercicios = leccion.getEjercicios().length;
-    const porcentajeAvance = this.servicioProgreso.calcularPorcentajeAvance(
-      respuestasCorrectas,
-      totalEjercicios
-    );
-
-    const nivelCompletado =
-      this.servicioProgreso.determinarNivelCompletado(porcentajeAvance);
-
-    // Publicar evento
-    const event = new ProgresoActualizadoEvent(
-      `prog-${Date.now()}`,
-      command.leccionId,
-      new Date(),
-      {
-        usuarioId: command.usuarioId,
-        leccionId: command.leccionId,
-        porcentajeAvance,
-        nivelCompletado,
+      const leccion = await this.leccionRepository.findById(command.leccionId);
+      if (!leccion) {
+        throw new Error(`Lección no encontrada: ${command.leccionId}`);
       }
-    );
 
-    await this.eventPublisher.publish(event);
+      const respuestasUsuario = await this.respuestaRepository.findByUsuarioId(
+        command.usuarioId
+      );
+      const respuestasLeccion = respuestasUsuario.filter((r) =>
+        leccion.getEjercicios().some((ej) => ej.getId() === r.getEjercicioId())
+      );
+
+      const respuestasCorrectas = respuestasLeccion.filter((r) =>
+        r.getResultado().esAcierto()
+      ).length;
+
+      const totalEjercicios = leccion.getEjercicios().length;
+      const porcentajeAvance = totalEjercicios > 0 
+        ? (respuestasCorrectas / totalEjercicios) * 100 
+        : 0;
+
+      await this.eventPublisher.publish(
+        new ProgresoActualizadoSagaCompleted(
+          command.leccionId,
+          command.usuarioId,
+          command.leccionId,
+          porcentajeAvance,
+          sagaId
+        )
+      );
+
+      const event = new ProgresoActualizado(
+        command.leccionId,
+        command.usuarioId,
+        porcentajeAvance
+      );
+
+      await this.eventPublisher.publish(event);
+      
+    } catch (error) {
+      console.error(`[SAGA] Error en ActualizarProgreso: ${error}`);
+      
+      await this.eventPublisher.publish(
+        new ProgresoActualizadoSagaFailed(
+          command.leccionId,
+          command.usuarioId,
+          command.leccionId,
+          error instanceof Error ? error.message : "Error desconocido",
+          sagaId
+        )
+      );
+        
+      throw error;
+    }
   }
 }

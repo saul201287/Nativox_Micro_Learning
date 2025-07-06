@@ -1,5 +1,10 @@
 import { Ejercicio } from "../../domain/Entities/Ejercicio";
 import { EjercicioCreado } from "../../domain/Events/DomainEvent";
+import { 
+  EjercicioCreadoSagaStarted,
+  EjercicioCreadoSagaCompleted,
+  EjercicioCreadoSagaFailed
+} from "../../domain/Events/SagaEvents";
 import { ContenidoEjercicio } from "../../domain/ObjetValues/ContenidoEjercicio";
 import { EjercicioRepository } from "../../domain/Ports/EjercicioRepository";
 import { EventPublisher } from "../../domain/Ports/EventPublisher";
@@ -14,36 +19,74 @@ export class CrearEjercicioUseCase {
   ) {}
 
   async execute(dto: CrearEjercicioDto): Promise<string> {
+    const sagaId = crypto.randomUUID();
+    let ejercicioId: string | null = null;
     
-    const leccion = await this.leccionRepository.findById(dto.leccionId);
-    if (!leccion) {
-      throw new Error("Lección no encontrada");
+    try {
+      // Paso 1: Iniciar SAGA
+      await this.eventPublisher.publish(
+        new EjercicioCreadoSagaStarted(
+          dto.leccionId,
+          dto.leccionId,
+          dto,
+          sagaId
+        )
+      );
+
+      const leccion = await this.leccionRepository.findById(dto.leccionId);
+      if (!leccion) {
+        throw new Error("Lección no encontrada");
+      }
+      
+      ejercicioId = crypto.randomUUID();
+      const contenido = new ContenidoEjercicio(
+        dto.enunciado,
+        dto.imagenes || [],
+        dto.opciones
+      );
+
+      const ejercicio = new Ejercicio(
+        ejercicioId,
+        dto.leccionId,
+        dto.tipo,
+        dto.enunciado,
+        contenido,
+        dto.respuestaCorrecta
+      );
+      
+      await this.ejercicioRepository.save(ejercicio);
+      
+      leccion.agregarEjercicio(ejercicio);
+      await this.leccionRepository.save(leccion);
+
+      await this.eventPublisher.publish(
+        new EjercicioCreadoSagaCompleted(
+          ejercicioId,
+          dto.leccionId,
+          ejercicioId,
+          sagaId
+        )
+      );
+
+      await this.eventPublisher.publish(
+        new EjercicioCreado(ejercicioId, dto.leccionId, dto.tipo)
+      );
+
+      return ejercicioId;
+      
+    } catch (error) {
+      console.error(`[SAGA] Error en CrearEjercicio: ${error}`);
+      
+      await this.eventPublisher.publish(
+        new EjercicioCreadoSagaFailed(
+          dto.leccionId,
+          dto.leccionId,
+          error instanceof Error ? error.message : "Error desconocido",
+          sagaId
+        )
+      );
+      
+      throw error;
     }
-    
-    const ejercicioId = crypto.randomUUID();
-    const contenido = new ContenidoEjercicio(
-      dto.enunciado,
-      dto.imagenes || [],
-      dto.opciones
-    );
-
-    const ejercicio = new Ejercicio(
-      ejercicioId,
-      dto.leccionId,
-      dto.tipo,
-      dto.enunciado,
-      contenido,
-      dto.respuestaCorrecta
-    );
-    
-    await this.ejercicioRepository.save(ejercicio);
-    leccion.agregarEjercicio(ejercicio);
-    await this.leccionRepository.save(leccion);
-
-    await this.eventPublisher.publish(
-      new EjercicioCreado(ejercicioId, dto.leccionId, dto.tipo)
-    );
-
-    return ejercicioId;
   }
 }

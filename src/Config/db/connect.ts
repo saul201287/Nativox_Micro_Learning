@@ -12,7 +12,7 @@ const AppDataSource = new DataSource({
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
-  synchronize: process.env.NODE_ENV === "development" ? true : false,
+  synchronize: process.env.NODE_ENV === "development",
   logging: false, //process.env.NODE_ENV === "development",
   entities:
     process.env.NODE_ENV === "production"
@@ -30,7 +30,7 @@ const AppDataSource = new DataSource({
 
 class Database {
   private static instance: Database;
-  private dataSource: DataSource;
+  private readonly dataSource: DataSource;
 
   private constructor() {
     this.dataSource = AppDataSource;

@@ -1,4 +1,9 @@
 import { RespuestaUsuario } from "../../domain/Entities/RespuestaUsuario";
+import { 
+  EjercicioResueltoSagaStarted,
+  EjercicioResueltoSagaCompleted,
+  EjercicioResueltoSagaFailed
+} from "../../domain/Events/SagaEvents";
 import { EventPublisher } from "../../domain/Ports/EventPublisher";
 import { LeccionRepository } from "../../domain/Ports/LeccionRepository";
 import { RespuestaUsuarioRepository } from "../../domain/Ports/RespuestaUsuarioRepository";
@@ -17,31 +22,75 @@ export class ResolverEjercicioUseCase {
     leccionId: string,
     dto: ResolverEjercicioDto
   ): Promise<RespuestaUsuario> {
-    const leccion = await this.leccionRepository.findById(leccionId);
-    if (!leccion) {
-      throw new Error("Lección no encontrada");
+    const sagaId = crypto.randomUUID();
+    let respuestaId: string | null = null;
+    
+    try {
+      // Paso 1: Iniciar SAGA
+      await this.eventPublisher.publish(
+        new EjercicioResueltoSagaStarted(
+          leccionId,
+          dto.usuarioId,
+          dto.ejercicioId,
+          dto,
+          sagaId
+        )
+      );
+
+      const leccion = await this.leccionRepository.findById(leccionId);
+      if (!leccion) {
+        throw new Error("Lección no encontrada");
+      }
+
+      const ejercicio = leccion.getEjercicios().find(e => e.getId() === dto.ejercicioId);
+      if (!ejercicio) {
+        throw new Error("Ejercicio no encontrado en esta lección");
+      }
+
+      // Paso 3: Evaluar respuesta
+      const resultado = this.servicioEvaluacion.evaluarRespuesta(ejercicio, dto.respuesta);
+
+      // Paso 4: Crear respuesta de usuario
+      respuestaId = crypto.randomUUID();
+      const respuestaUsuario = new RespuestaUsuario(
+        respuestaId,
+        dto.usuarioId,
+        dto.ejercicioId,
+        dto.respuesta,
+        resultado
+      );
+
+      // Paso 5: Guardar respuesta
+      await this.respuestaRepository.save(respuestaUsuario);
+
+      // Paso 6: Completar SAGA exitosamente
+      await this.eventPublisher.publish(
+        new EjercicioResueltoSagaCompleted(
+          leccionId,
+          dto.usuarioId,
+          dto.ejercicioId,
+          respuestaId,
+          sagaId
+        )
+      );
+
+      return respuestaUsuario;
+      
+    } catch (error) {
+      console.error(`[SAGA] Error en ResolverEjercicio: ${error}`);
+      
+      // Publicar evento de fallo para activar compensación
+      await this.eventPublisher.publish(
+        new EjercicioResueltoSagaFailed(
+          leccionId,
+          dto.usuarioId,
+          dto.ejercicioId,
+          error instanceof Error ? error.message : "Error desconocido",
+          sagaId
+        )
+      );
+      
+      throw error;
     }
-
-    const ejercicio = leccion.getEjercicios().find(e => e.getId() === dto.ejercicioId);
-    if (!ejercicio) {
-      throw new Error("Ejercicio no encontrado en esta lección");
-    }
-
-    const resultado = this.servicioEvaluacion.evaluarRespuesta(ejercicio, dto.respuesta);
-
-    const respuestaUsuario = new RespuestaUsuario(
-      crypto.randomUUID(),
-      dto.usuarioId,
-      dto.ejercicioId,
-      dto.respuesta,
-      resultado
-    );
-
-    await this.respuestaRepository.save(respuestaUsuario);
-
-    // Publicar eventos si es necesario
-    // (puedes agregar aquí la lógica de eventos de dominio si lo requieres)
-
-    return respuestaUsuario;
   }
 }

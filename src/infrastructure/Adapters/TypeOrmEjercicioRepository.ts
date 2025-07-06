@@ -6,8 +6,8 @@ import { EjercicioMapper } from "../../shared/Mappers";
 import { LeccionEntity } from "../../Config/db/entities/LeccionEntity";
 
 export class TypeOrmEjercicioRepository implements EjercicioRepository {
-  private repository: Repository<EjercicioEntity>;
-  private repositoryLeccion: Repository<LeccionEntity>;
+  private readonly repository: Repository<EjercicioEntity>;
+  private readonly repositoryLeccion: Repository<LeccionEntity>;
 
   constructor(dataSource: DataSource) {
     this.repository = dataSource.getRepository(EjercicioEntity);
@@ -22,13 +22,13 @@ export class TypeOrmEjercicioRepository implements EjercicioRepository {
         where: { id: leccionId },
       });
       if (!leccion) {
-        throw "error: no se encontro la entidad leccion";
+        throw new Error("error: no se encontro la entidad leccion");
       }
       entity.leccion = leccion
       
       await this.repository.save(entity);
     } catch (error) {
-      throw "error: " + error;
+      throw new Error("error: " + error);
     }
   }
 
@@ -50,6 +50,15 @@ export class TypeOrmEjercicioRepository implements EjercicioRepository {
       return entities.map(EjercicioMapper.toDomain);
     } catch (error) {
       console.error("Error buscando ejercicios por lección:", error);
+      throw error;
+    }
+  }
+
+  async deleteById(id: string): Promise<void> {
+    try {
+      await this.repository.delete(id);
+    } catch (error) {
+      console.error("Error eliminando ejercicio:", error);
       throw error;
     }
   }

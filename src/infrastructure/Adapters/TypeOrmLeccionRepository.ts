@@ -6,7 +6,7 @@ import { LeccionRepository } from "../../domain/Ports/LeccionRepository";
 import { LeccionMapper } from "../../shared/Mappers";
 
 export class TypeOrmLeccionRepository implements LeccionRepository {
-  private repository: Repository<LeccionEntity>;
+  private readonly repository: Repository<LeccionEntity>;
 
   constructor(dataSource: DataSource) {
     try {

@@ -5,5 +5,6 @@ export interface RespuestaUsuarioRepository {
   findById(id: string): Promise<RespuestaUsuario | null>;
   findByUsuarioId(usuarioId: string): Promise<RespuestaUsuario[]>;
   findByEjercicioId(ejercicioId: string): Promise<RespuestaUsuario[]>;
+  deleteById(id: string): Promise<void>;
 }
 

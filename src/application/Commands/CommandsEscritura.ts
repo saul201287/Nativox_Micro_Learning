@@ -73,3 +73,16 @@ export class EliminarLeccionCommand extends Command {
     return "EliminarLeccion";
   }
 }
+
+export class ActualizarProgresoCommand extends Command {
+  constructor(
+    public readonly usuarioId: string,
+    public readonly leccionId: string
+  ) {
+    super();
+  }
+
+  getCommandName(): string {
+    return "ActualizarProgreso";
+  }
+}

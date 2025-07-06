@@ -53,4 +53,13 @@ export class TypeOrmRespuestaUsuarioRepository
       throw "error: " + error;
     }
   }
+
+  async deleteById(id: string): Promise<void> {
+    try {
+      await this.repository.delete(id);
+    } catch (error) {
+      console.error("Error eliminando respuesta de usuario:", error);
+      throw error;
+    }
+  }
 }

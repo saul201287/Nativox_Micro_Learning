@@ -10,12 +10,12 @@ import { NivelDificultad } from "../ObjetValues/NivelDificultad";
 import { ResultadoRespuesta } from "../ObjetValues/ResultadoRespuesta";
 
 export class Leccion {
-  private ejercicios: Ejercicio[] = [];
+  private readonly ejercicios: Ejercicio[] = [];
   private eventos: DomainEvent[] = [];
 
   constructor(
     private readonly id: string,
-    private titulo: string,
+    private readonly titulo: string,
     private readonly nivel: NivelDificultad,
     private readonly contenidoJson: any,
     private readonly idioma: string
@@ -52,6 +52,13 @@ export class Leccion {
       throw new Error("El ejercicio no pertenece a esta lección");
     }
     this.ejercicios.push(ejercicio);
+  }
+
+  removerEjercicio(ejercicioId: string): void {
+    const index = this.ejercicios.findIndex(e => e.getId() === ejercicioId);
+    if (index !== -1) {
+      this.ejercicios.splice(index, 1);
+    }
   }
 
   resolverEjercicio(
