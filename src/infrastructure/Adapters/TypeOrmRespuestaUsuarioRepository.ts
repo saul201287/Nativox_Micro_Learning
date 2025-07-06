@@ -14,26 +14,43 @@ export class TypeOrmRespuestaUsuarioRepository
   }
 
   async save(respuesta: RespuestaUsuario): Promise<void> {
-    const entity = RespuestaUsuarioMapper.toEntity(respuesta);
-    await this.repository.save(entity);
+    try {
+      
+      const entity = RespuestaUsuarioMapper.toEntity(respuesta);
+      await this.repository.save(entity);
+    } catch (error) {
+      throw "error: " + error;
+    }
   }
 
   async findById(id: string): Promise<RespuestaUsuario | null> {
-    const entity = await this.repository.findOne({ where: { id } });
-    return entity ? RespuestaUsuarioMapper.toDomain(entity) : null;
+    try {
+      const entity = await this.repository.findOne({ where: { id } });
+      return entity ? RespuestaUsuarioMapper.toDomain(entity) : null;
+    } catch (error) {
+      throw "error: " + error;
+    }
   }
 
   async findByUsuarioId(usuarioId: string): Promise<RespuestaUsuario[]> {
-    const entities = await this.repository.find({
-      where: { usuario_id: usuarioId },
-    });
-    return entities.map(RespuestaUsuarioMapper.toDomain);
+    try {
+      const entities = await this.repository.find({
+        where: { usuario_id: usuarioId },
+      });
+      return entities.map(RespuestaUsuarioMapper.toDomain);
+    } catch (error) {
+      throw "error: " + error;
+    }
   }
 
   async findByEjercicioId(ejercicioId: string): Promise<RespuestaUsuario[]> {
-    const entities = await this.repository.find({
-      where: { ejercicio_id: ejercicioId },
-    });
-    return entities.map(RespuestaUsuarioMapper.toDomain);
+    try {
+      const entities = await this.repository.find({
+        where: { ejercicio_id: ejercicioId },
+      });
+      return entities.map(RespuestaUsuarioMapper.toDomain);
+    } catch (error) {
+      throw "error: " + error;
+    }
   }
 }

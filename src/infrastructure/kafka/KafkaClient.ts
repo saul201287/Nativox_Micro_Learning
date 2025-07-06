@@ -1,4 +1,4 @@
-import { Kafka } from 'kafkajs';
+import { EachMessagePayload, Kafka } from 'kafkajs';
 
 export class KafkaClient {
     private kafka: Kafka;
@@ -45,9 +45,9 @@ export class KafkaClient {
 
     async runConsumer(callback: (message: any) => void) {
         await this.consumer.run({
-            eachMessage: async ({ topic, partition, message }) => {
-                callback(JSON.parse(message.value.toString()));
-            },
+          eachMessage: async (payload: EachMessagePayload) => {
+            callback(JSON.parse(payload.message.value!.toString()));
+          },
         });
     }
 }

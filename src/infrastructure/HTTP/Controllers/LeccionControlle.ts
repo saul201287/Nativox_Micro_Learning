@@ -26,7 +26,9 @@ export class LeccionController {
   async resolverEjercicio(req: Request, res: Response): Promise<void> {
     try {
       const { leccionId } = req.params;
+      
       const dto: ResolverEjercicioDto = req.body;
+      
       const respuesta = await this.resolverEjercicioUseCase.execute(leccionId, dto);
       res.status(200).json({
         id: respuesta.getId(),

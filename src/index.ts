@@ -21,7 +21,7 @@ async function bootstrap() {
     app.get("/health", (req, res) => {
       res.json({
         status: "ok",
-        service: "usuario-service",
+        service: "aprendizaje-service",
         database: dataSource.isInitialized ? "connected" : "disconnected",
       });
     });

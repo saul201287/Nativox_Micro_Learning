@@ -9,36 +9,62 @@ export class TypeOrmLeccionRepository implements LeccionRepository {
   private repository: Repository<LeccionEntity>;
 
   constructor(dataSource: DataSource) {
-    this.repository = dataSource.getRepository(LeccionEntity);
+    try {
+      this.repository = dataSource.getRepository(LeccionEntity);
+    } catch (error) {
+      console.error("Error: ", error);
+      throw error;
+    }
   }
 
   async save(leccion: Leccion): Promise<void> {
-    const entity = LeccionMapper.toEntity(leccion);
-    await this.repository.save(entity);
+    try {
+      const entity = LeccionMapper.toEntity(leccion);
+      await this.repository.save(entity);
+    } catch (error) {
+      console.error("Error: ", error);
+      throw error;
+    }
   }
 
   async findById(id: string): Promise<Leccion | null> {
-    const entity = await this.repository.findOne({
-      where: { id },
-      relations: ["ejercicios"],
-    });
-    return entity ? LeccionMapper.toDomain(entity) : null;
+    try {
+      
+      const entity = await this.repository.findOne({
+        where: { id },
+        relations: ["ejercicios"],
+      });
+      
+      return entity ? LeccionMapper.toDomain(entity) : null;
+    } catch (error) {
+      console.error("Error: ", error);
+      throw error;
+    }
   }
 
   async findByNivel(nivel: NivelDificultad): Promise<Leccion[]> {
-    const entities = await this.repository.find({
-      where: { nivel: nivel.getValue() },
-      relations: ["ejercicios"],
-    });
-    return entities.map(LeccionMapper.toDomain);
+    try {
+      const entities = await this.repository.find({
+        where: { nivel: nivel.getValue() },
+        relations: ["ejercicios"],
+      });
+      return entities.map(LeccionMapper.toDomain);
+    } catch (error) {
+      console.error("Error: ", error);
+      throw error;
+    }
   }
 
   async findByIdioma(idioma: string): Promise<Leccion[]> {
-    const entities = await this.repository.find({
-      where: { idioma },
-      relations: ["ejercicios"],
-    });
-    return entities.map(LeccionMapper.toDomain);
+    try {
+      const entities = await this.repository.find({
+        where: { idioma },
+        relations: ["ejercicios"],
+      });
+      return entities.map(LeccionMapper.toDomain);
+    } catch (error) {
+      console.error("Error: ", error);
+      throw error;
+    }
   }
 }
-

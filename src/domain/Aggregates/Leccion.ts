@@ -93,16 +93,21 @@ export class Leccion {
     usuarioId: string,
     respuestasUsuario: RespuestaUsuario[]
   ): number {
-    const ejerciciosResueltos = respuestasUsuario.filter(
+    const respuestasFiltradas = respuestasUsuario.filter(
       (r) =>
         r.getUsuarioId() === usuarioId &&
         this.ejercicios.some((e) => e.getId() === r.getEjercicioId())
     );
 
+    const respuestasUnicas = new Map<string, RespuestaUsuario>();
+    for (const respuesta of respuestasFiltradas) {
+      respuestasUnicas.set(respuesta.getEjercicioId(), respuesta);
+    }
+
     if (this.ejercicios.length === 0) return 0;
 
     const progreso =
-      (ejerciciosResueltos.length / this.ejercicios.length) * 100;
+      (respuestasUnicas.size / this.ejercicios.length) * 100;
 
     this.eventos.push(new ProgresoActualizado(this.id, usuarioId, progreso));
 

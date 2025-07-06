@@ -22,21 +22,25 @@ export class ResolverEjercicioUseCase {
       throw new Error("Lección no encontrada");
     }
 
-    const respuestaUsuario = leccion.resolverEjercicio(
+    const ejercicio = leccion.getEjercicios().find(e => e.getId() === dto.ejercicioId);
+    if (!ejercicio) {
+      throw new Error("Ejercicio no encontrado en esta lección");
+    }
+
+    const resultado = this.servicioEvaluacion.evaluarRespuesta(ejercicio, dto.respuesta);
+
+    const respuestaUsuario = new RespuestaUsuario(
+      crypto.randomUUID(),
       dto.usuarioId,
       dto.ejercicioId,
       dto.respuesta,
-      dto.tiempoRespuesta
+      resultado
     );
 
     await this.respuestaRepository.save(respuestaUsuario);
 
-    // Publicar eventos
-    const eventos = leccion.getEventos();
-    for (const evento of eventos) {
-      await this.eventPublisher.publish(evento);
-    }
-    leccion.limpiarEventos();
+    // Publicar eventos si es necesario
+    // (puedes agregar aquí la lógica de eventos de dominio si lo requieres)
 
     return respuestaUsuario;
   }

@@ -33,6 +33,10 @@ export class Ejercicio {
     return this.contenido;
   }
 
+  getRespuesta(): string{
+    return this.respuestaCorrecta
+  }
+
   evaluarRespuesta(respuesta: string): boolean {
     return (
       this.respuestaCorrecta.toLowerCase().trim() ===

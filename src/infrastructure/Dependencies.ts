@@ -22,6 +22,8 @@ import { ObtenerRespuestasPorEjercicioUseCase } from "../application/UseCases/Ob
 import { ObtenerRespuestasUsuarioUseCase } from "../application/UseCases/ObtenerRespuestasUsuarioUseCase";
 import { ObtenerEstadisticasLeccionUseCase } from "../application/UseCases/ObtenerEstadisticasLeccionUseCase";
 import { EjercicioController } from "./HTTP/Controllers/EjercicioController";
+import { LeccionQueryController } from "./HTTP/Controllers/LeccionQueryController";
+import { UsuarioController } from "./HTTP/Controllers/UsuarioController";
 
 dotenv.config();
 
@@ -48,7 +50,6 @@ const respuestaRepository = new TypeOrmRespuestaUsuarioRepository(dataSource);
 const servicioEvaluacion = new ServicioDeEvaluacionImpl();
 const servicioProgreso = new ServicioDeProgresoImpl(respuestaRepository);
 
-// Use Cases
 const crearLeccionUseCase = new CrearLeccionUseCase(
   leccionRepository,
   eventPublisher
@@ -109,4 +110,15 @@ export const ejerciciosController = new EjercicioController(
   listarEjerciciosPorLeccionUseCase,
   obtenerEjercicioUseCase,
   obtenerRespuestasPorEjercicioUseCase
+);
+
+export const leccionQueryController = new LeccionQueryController(
+  obtenerLeccionUseCase,
+  listarLeccionesUseCase,
+  actualizarLeccionUseCase
+);
+
+export const usuarioController = new UsuarioController(
+  obtenerRespuestasUsuarioUseCase,
+  obtenerEstadisticasLeccionUseCase
 );

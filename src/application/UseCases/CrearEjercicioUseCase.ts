@@ -14,11 +14,12 @@ export class CrearEjercicioUseCase {
   ) {}
 
   async execute(dto: CrearEjercicioDto): Promise<string> {
+    
     const leccion = await this.leccionRepository.findById(dto.leccionId);
     if (!leccion) {
       throw new Error("Lección no encontrada");
     }
-
+    
     const ejercicioId = crypto.randomUUID();
     const contenido = new ContenidoEjercicio(
       dto.enunciado,
@@ -34,12 +35,11 @@ export class CrearEjercicioUseCase {
       contenido,
       dto.respuestaCorrecta
     );
-
+    
     await this.ejercicioRepository.save(ejercicio);
     leccion.agregarEjercicio(ejercicio);
     await this.leccionRepository.save(leccion);
 
-    // Publicar evento
     await this.eventPublisher.publish(
       new EjercicioCreado(ejercicioId, dto.leccionId, dto.tipo)
     );

@@ -7,11 +7,13 @@ export class ListarLeccionesUseCase {
   constructor(private leccionRepository: LeccionRepository) {}
 
   async execute(filtros: FiltrosLeccionDto): Promise<Leccion[]> {
+    
     if (filtros.nivel && filtros.idioma) {
       const leccionesPorNivel = await this.leccionRepository.findByNivel(
         NivelDificultad.fromString(filtros.nivel)
       );
-      return leccionesPorNivel.filter((l) => l.getIdioma() === filtros.idioma);
+      
+      return leccionesPorNivel.filter((l) => l.getIdioma() == filtros.idioma);
     }
 
     if (filtros.nivel) {

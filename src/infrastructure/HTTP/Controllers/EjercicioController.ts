@@ -20,8 +20,11 @@ export class EjercicioController {
     try {
       const dto: CrearEjercicioDto = req.body;
       const id = await this.crearEjercicioUseCase.execute(dto);
+      
       res.status(201).json({ id });
     } catch (error) {
+      console.error(error);
+      
       res.status(400).json({ error: error });
     }
   }

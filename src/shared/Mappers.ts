@@ -68,7 +68,7 @@ export class EjercicioMapper {
       imagenes: ejercicio.getContenido().getImagenes(),
       opciones: ejercicio.getContenido().getOpciones(),
     };
-    entity.respuesta_correcta = ejercicio.getContenido().getTexto();
+    entity.respuesta_correcta = ejercicio.getRespuesta();
     return entity;
   }
 }

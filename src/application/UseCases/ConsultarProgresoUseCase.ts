@@ -21,12 +21,11 @@ export class ConsultarProgresoUseCase {
       dto.usuarioId
     );
 
-    // Publicar eventos
-    const eventos = leccion.getEventos();
-    for (const evento of eventos) {
-      await this.eventPublisher.publish(evento);
-    }
-    leccion.limpiarEventos();
+      const eventos = leccion.getEventos();
+      for (const evento of eventos) {
+        await this.eventPublisher.publish(evento);
+      }
+      leccion.limpiarEventos();
 
     return progreso;
   }

@@ -11,8 +11,8 @@ export class LeccionEntity {
 
   @Column({
     type: "enum",
-    enum: ["básico", "intermedio"],
-    default: "básico",
+    enum: ["basico", "intermedio"],
+    default: "basico",
   })
   nivel!: string;
 
