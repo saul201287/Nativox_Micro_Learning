@@ -1,0 +1,56 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: microservicio-aprendizaje-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_DATABASE:-aprendizaje_db}
+      MYSQL_USER: ${DB_USER:-admin}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-userpassword}
+    ports:
+      - "3307:3306" 
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - aprendizaje-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  api:
+    build: .
+    container_name: microservicio-aprendizaje-api
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: ${DB_USER:-admin}
+      DB_PASSWORD: ${DB_PASSWORD:-userpassword}
+      DB_DATABASE: ${DB_DATABASE:-aprendizaje_db}
+      PORT: 8081
+      JWT_SECRET: ${JWT_SECRET:-supersecreto}
+      BROKER: ${BROKER:-localhost:9092}
+      CLIENT_ID: ${CLIENT_ID:-microservicio-aprendizaje}
+      CLIENT_KAFKA_ID: ${CLIENT_KAFKA_ID:-microservicio-aprendizaje}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - aprendizaje-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  mysql_data:
+
+networks:
+  aprendizaje-network:
+    driver: bridge

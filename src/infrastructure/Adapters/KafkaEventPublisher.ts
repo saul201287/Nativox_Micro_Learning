@@ -3,9 +3,9 @@ import { DomainEvent } from "../../domain/Events/DomainEvent";
 import { EventPublisher } from "../../domain/Ports/EventPublisher";
 
 export class KafkaEventPublisher implements EventPublisher {
-  private producer: Producer;
+  private readonly producer: Producer;
 
-  constructor(private kafka: Kafka) {
+  constructor(private readonly kafka: Kafka) {
     this.producer = kafka.producer();
   }
 

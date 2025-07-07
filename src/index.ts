@@ -9,7 +9,6 @@ async function bootstrap() {
     await database.connect();
     const dataSource = database.getDataSource();
 
-    // Iniciar SAGA Event Handler
     await sagaEventHandler.startListening();
     console.log("[SAGA] Event handler iniciado correctamente");
 
@@ -31,7 +30,7 @@ async function bootstrap() {
       });
     });
 
-    const port = process.env.PORT || 3000;
+    const port = process.env.PORT ?? 3000;
     const options = {
       secrets: ["([0-9]{4}-?)+"],
     };

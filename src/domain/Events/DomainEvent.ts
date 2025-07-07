@@ -65,3 +65,23 @@ export class EjercicioCreado extends DomainEvent {
     return "EjercicioCreado";
   }
 }
+
+export class RespuestaEvaluadaEvent extends DomainEvent {
+  constructor(
+    aggregateId: string,
+    public readonly leccionId: string,
+    occurredOn: Date,
+    public readonly data: {
+      usuarioId: string;
+      ejercicioId: string;
+      esCorrecta: boolean;
+      tiempoRespuesta: number;
+    }
+  ) {
+    super(aggregateId, occurredOn);
+  }
+
+  getEventName(): string {
+    return "RespuestaEvaluada";
+  }
+}

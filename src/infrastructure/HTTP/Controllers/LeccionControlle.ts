@@ -8,9 +8,9 @@ import { ResolverEjercicioUseCase } from "../../../application/UseCases/Resolver
 
 export class LeccionController {
   constructor(
-    private crearLeccionUseCase: CrearLeccionUseCase,
-    private resolverEjercicioUseCase: ResolverEjercicioUseCase,
-    private consultarProgresoUseCase: ConsultarProgresoUseCase
+    private readonly crearLeccionUseCase: CrearLeccionUseCase,
+    private readonly resolverEjercicioUseCase: ResolverEjercicioUseCase,
+    private readonly consultarProgresoUseCase: ConsultarProgresoUseCase
   ) {}
 
   async crearLeccion(req: Request, res: Response): Promise<void> {

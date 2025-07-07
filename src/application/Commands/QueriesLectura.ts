@@ -86,3 +86,13 @@ export class ObtenerEstadisticasLeccionQuery extends Query {
     return "ObtenerEstadisticasLeccion";
   }
 }
+
+export class EvaluarRespuestaCommand {
+  constructor(
+    public readonly respuestaId: string,
+    public readonly usuarioId: string,
+    public readonly ejercicioId: string,
+    public readonly respuesta: string,
+    public readonly tiempoRespuesta: number
+  ) {}
+}
