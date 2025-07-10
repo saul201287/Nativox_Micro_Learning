@@ -12,10 +12,10 @@ import { ResolverEjercicioDto } from "../DTOs/ResolverEjercicioDto";
 
 export class ResolverEjercicioUseCase {
   constructor(
-    private leccionRepository: LeccionRepository,
-    private respuestaRepository: RespuestaUsuarioRepository,
-    private servicioEvaluacion: ServicioDeEvaluacion,
-    private eventPublisher: EventPublisher
+    private readonly leccionRepository: LeccionRepository,
+    private readonly respuestaRepository: RespuestaUsuarioRepository,
+    private readonly servicioEvaluacion: ServicioDeEvaluacion,
+    private readonly eventPublisher: EventPublisher
   ) {}
 
   async execute(
@@ -26,7 +26,6 @@ export class ResolverEjercicioUseCase {
     let respuestaId: string | null = null;
     
     try {
-      // Paso 1: Iniciar SAGA
       await this.eventPublisher.publish(
         new EjercicioResueltoSagaStarted(
           leccionId,
@@ -47,10 +46,8 @@ export class ResolverEjercicioUseCase {
         throw new Error("Ejercicio no encontrado en esta lección");
       }
 
-      // Paso 3: Evaluar respuesta
       const resultado = this.servicioEvaluacion.evaluarRespuesta(ejercicio, dto.respuesta);
 
-      // Paso 4: Crear respuesta de usuario
       respuestaId = crypto.randomUUID();
       const respuestaUsuario = new RespuestaUsuario(
         respuestaId,
@@ -60,10 +57,8 @@ export class ResolverEjercicioUseCase {
         resultado
       );
 
-      // Paso 5: Guardar respuesta
       await this.respuestaRepository.save(respuestaUsuario);
 
-      // Paso 6: Completar SAGA exitosamente
       await this.eventPublisher.publish(
         new EjercicioResueltoSagaCompleted(
           leccionId,
@@ -79,7 +74,6 @@ export class ResolverEjercicioUseCase {
     } catch (error) {
       console.error(`[SAGA] Error en ResolverEjercicio: ${error}`);
       
-      // Publicar evento de fallo para activar compensación
       await this.eventPublisher.publish(
         new EjercicioResueltoSagaFailed(
           leccionId,

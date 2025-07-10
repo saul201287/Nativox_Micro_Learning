@@ -61,6 +61,27 @@ routerLecciones.get(
   }
 );
 
+routerLecciones.post(
+  "/usuarios/:usuarioId/lecciones/:leccionId/progreso/actualizar",
+  (req, res, next) => {
+    authMiddleware(req, res, next);
+  },
+  (req, res) => {
+    req.body.usuarioId = req.params.usuarioId;
+    req.body.leccionId = req.params.leccionId;
+    leccionController
+      .actualizarProgreso(req, res)
+      .then((data) => {
+        return data;
+      })
+      .catch((err) => {
+        res
+          .status(500)
+          .send({ error: err.message, msg: "Error en el servidor" });
+      });
+  }
+);
+
 routerLecciones.get(
   "/lecciones/:leccionId",
   (req, res, next) => {

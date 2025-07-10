@@ -27,7 +27,7 @@ services:
     ports:
       - "8081:8081"
     environment:
-      DB_HOST: mysql
+      DB_HOST: ${DB_HOST:-mysql} 
       DB_PORT: 3306
       DB_USER: ${DB_USER:-admin}
       DB_PASSWORD: ${DB_PASSWORD:-userpassword}

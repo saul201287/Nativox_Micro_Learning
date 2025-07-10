@@ -7,7 +7,7 @@ import { RespuestaUsuarioMapper } from "../../shared/Mappers";
 export class TypeOrmRespuestaUsuarioRepository
   implements RespuestaUsuarioRepository
 {
-  private repository: Repository<RespuestaUsuarioEntity>;
+  private readonly repository: Repository<RespuestaUsuarioEntity>;
 
   constructor(dataSource: DataSource) {
     this.repository = dataSource.getRepository(RespuestaUsuarioEntity);
@@ -19,7 +19,8 @@ export class TypeOrmRespuestaUsuarioRepository
       const entity = RespuestaUsuarioMapper.toEntity(respuesta);
       await this.repository.save(entity);
     } catch (error) {
-      throw "error: " + error;
+      console.error("Error: ", error);
+      throw error;
     }
   }
 
@@ -28,7 +29,8 @@ export class TypeOrmRespuestaUsuarioRepository
       const entity = await this.repository.findOne({ where: { id } });
       return entity ? RespuestaUsuarioMapper.toDomain(entity) : null;
     } catch (error) {
-      throw "error: " + error;
+      console.error("Error: ", error);
+      throw error;
     }
   }
 
@@ -39,7 +41,8 @@ export class TypeOrmRespuestaUsuarioRepository
       });
       return entities.map(RespuestaUsuarioMapper.toDomain);
     } catch (error) {
-      throw "error: " + error;
+      console.error("Error: ", error);
+      throw error;
     }
   }
 
@@ -50,7 +53,8 @@ export class TypeOrmRespuestaUsuarioRepository
       });
       return entities.map(RespuestaUsuarioMapper.toDomain);
     } catch (error) {
-      throw "error: " + error;
+      console.error("Error: ", error);
+      throw error;
     }
   }
 

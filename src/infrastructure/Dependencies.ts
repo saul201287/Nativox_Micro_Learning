@@ -27,6 +27,13 @@ import { ObtenerEstadisticasLeccionUseCase } from "../application/UseCases/Obten
 import { EjercicioController } from "./HTTP/Controllers/EjercicioController";
 import { LeccionQueryController } from "./HTTP/Controllers/LeccionQueryController";
 import { UsuarioController } from "./HTTP/Controllers/UsuarioController";
+import { TypeOrmUsuarioNotificableRepository } from "./Adapters/TypeOrmUsuarioNotificableRepository";
+import { EmailNotificationStrategy } from "./Notifications/EmailNotificationStrategy";
+import { PushNotificationStrategy } from "./Notifications/PushNotificationStrategy";
+import { ServicioDeNotificaciones } from "../domain/Services/ServicioDeNotificaciones";
+import { ActualizarProgresoUseCase } from "../application/UseCases/ActualizarProgresoUseCase";
+import { FcmTokenActualizadoConsumer } from "./kafka/FcmTokenActualizadoConsumer";
+  import { UsuarioRegistradoConsumer } from "./kafka/UsuarioRegistradoConsumer";
 
 dotenv.config();
 
@@ -63,6 +70,16 @@ const sagaCompensationService = new SagaCompensationServiceImpl(
 const kafkaClient = new KafkaClient([process.env.BROKER || 'localhost:9092']);
 const sagaEventHandler = new SagaEventHandler(kafkaClient, sagaCompensationService);
 
+const usuarioNotificableRepository = new TypeOrmUsuarioNotificableRepository(dataSource);
+const emailNotificationStrategy = new EmailNotificationStrategy();
+const pushNotificationStrategy = new PushNotificationStrategy();
+
+export const servicioDeNotificaciones = new ServicioDeNotificaciones(
+  usuarioNotificableRepository,
+  emailNotificationStrategy,
+  pushNotificationStrategy
+);
+
 const crearLeccionUseCase = new CrearLeccionUseCase(
   leccionRepository,
   eventPublisher
@@ -77,6 +94,13 @@ const consultarProgresoUseCase = new ConsultarProgresoUseCase(
   leccionRepository,
   servicioProgreso,
   eventPublisher
+);
+const actualizarProgresoUseCase = new ActualizarProgresoUseCase(
+  leccionRepository,
+  respuestaRepository,
+  servicioProgreso,
+  eventPublisher,
+  servicioDeNotificaciones
 );
 
 const obtenerLeccionUseCase = new ObtenerLeccionUseCase(leccionRepository);
@@ -113,7 +137,8 @@ const obtenerEstadisticasLeccionUseCase = new ObtenerEstadisticasLeccionUseCase(
 export const leccionController = new LeccionController(
   crearLeccionUseCase,
   resolverEjercicioUseCase,
-  consultarProgresoUseCase
+  consultarProgresoUseCase,
+  actualizarProgresoUseCase
 );
 
 export const ejerciciosController = new EjercicioController(
@@ -136,3 +161,15 @@ export const usuarioController = new UsuarioController(
 );
 
 export { sagaEventHandler };
+
+const fcmTokenActualizadoConsumer = new FcmTokenActualizadoConsumer(
+  kafka,
+  usuarioNotificableRepository
+);
+const usuarioRegistradoConsumer = new UsuarioRegistradoConsumer(
+  kafka,
+  usuarioNotificableRepository
+);
+
+usuarioRegistradoConsumer.start();
+fcmTokenActualizadoConsumer.start();

@@ -4,3 +4,4 @@
 /dist
 /mysql
 /Dockerfile
+/service_account.json

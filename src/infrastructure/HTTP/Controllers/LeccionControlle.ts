@@ -5,12 +5,15 @@ import { ConsultarProgresoUseCase } from "../../../application/UseCases/Consulta
 import { CrearLeccionUseCase } from "../../../application/UseCases/CrearLeccionUseCase";
 import { Request, Response } from 'express';
 import { ResolverEjercicioUseCase } from "../../../application/UseCases/ResolverEjercicioUseCase";
+import { ActualizarProgresoUseCase } from "../../../application/UseCases/ActualizarProgresoUseCase";
+import { ActualizarProgresoCommand } from "../../../application/Commands/CommandsEscritura";
 
 export class LeccionController {
   constructor(
     private readonly crearLeccionUseCase: CrearLeccionUseCase,
     private readonly resolverEjercicioUseCase: ResolverEjercicioUseCase,
-    private readonly consultarProgresoUseCase: ConsultarProgresoUseCase
+    private readonly consultarProgresoUseCase: ConsultarProgresoUseCase,
+    private readonly actualizarProgresoUseCase: ActualizarProgresoUseCase
   ) {}
 
   async crearLeccion(req: Request, res: Response): Promise<void> {
@@ -48,6 +51,21 @@ export class LeccionController {
       res.status(200).json({ progreso });
     } catch (error) {
       res.status(400).json({ error: error });
+    }
+  }
+
+  async actualizarProgreso(req: Request, res: Response): Promise<void> {
+    try {
+      const { usuarioId, leccionId } = req.body;
+      if (!usuarioId || !leccionId) {
+        res.status(400).json({ error: "usuarioId y leccionId son requeridos" });
+        return;
+      }
+      const command = new ActualizarProgresoCommand(usuarioId, leccionId);
+      await this.actualizarProgresoUseCase.execute(command);
+      res.status(200).json({ message: "Progreso actualizado correctamente" });
+    } catch (error) {
+      res.status(400).json({ error: error instanceof Error ? error.message : error });
     }
   }
 }

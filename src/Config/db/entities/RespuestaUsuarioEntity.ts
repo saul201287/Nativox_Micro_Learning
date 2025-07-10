@@ -33,6 +33,11 @@ export class RespuestaUsuarioEntity {
   @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   timestamp!: Date;
 
+  @Column({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    onUpdate: "CURRENT_TIMESTAMP",
+  })
   @ManyToOne(() => EjercicioEntity, (ejercicio) => ejercicio.respuestas, {
     onDelete: "CASCADE",
   })

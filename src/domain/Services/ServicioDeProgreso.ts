@@ -6,7 +6,7 @@ export interface ServicioDeProgreso {
 }
 
 export class ServicioDeProgresoImpl implements ServicioDeProgreso {
-  constructor(private respuestaRepository: RespuestaUsuarioRepository) {}
+  constructor(private readonly respuestaRepository: RespuestaUsuarioRepository) {}
 
   async calcularProgreso(leccion: Leccion, usuarioId: string): Promise<number> {
     const respuestas = await this.respuestaRepository.findByUsuarioId(

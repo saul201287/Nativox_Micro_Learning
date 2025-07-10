@@ -9,13 +9,15 @@ import { LeccionRepository } from "../../domain/Ports/LeccionRepository";
 import { RespuestaUsuarioRepository } from "../../domain/Ports/RespuestaUsuarioRepository";
 import { ServicioDeProgreso } from "../../domain/Services/ServicioDeProgreso";
 import { ActualizarProgresoCommand } from "../Commands/CommandsEscritura";
+import { ServicioDeNotificaciones } from "../../domain/Services/ServicioDeNotificaciones";
 
 export class ActualizarProgresoUseCase {
   constructor(
     private readonly leccionRepository: LeccionRepository,
     private readonly respuestaRepository: RespuestaUsuarioRepository,
     private readonly servicioProgreso: ServicioDeProgreso,
-    private readonly eventPublisher: EventPublisher
+    private readonly eventPublisher: EventPublisher,
+    private readonly servicioDeNotificaciones: ServicioDeNotificaciones
   ) {}
 
   async execute(command: ActualizarProgresoCommand): Promise<void> {
@@ -69,6 +71,10 @@ export class ActualizarProgresoUseCase {
       );
 
       await this.eventPublisher.publish(event);
+
+      if (porcentajeAvance === 100) {
+        await this.servicioDeNotificaciones.notificarLeccionCompletada(command.usuarioId, leccion.getTitulo());
+      }
       
     } catch (error) {
       console.error(`[SAGA] Error en ActualizarProgreso: ${error}`);

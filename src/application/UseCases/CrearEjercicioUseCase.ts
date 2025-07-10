@@ -13,9 +13,9 @@ import { CrearEjercicioDto } from "../DTOs/CrearEjercicioDto";
 
 export class CrearEjercicioUseCase {
   constructor(
-    private leccionRepository: LeccionRepository,
-    private ejercicioRepository: EjercicioRepository,
-    private eventPublisher: EventPublisher
+    private readonly leccionRepository: LeccionRepository,
+    private readonly ejercicioRepository: EjercicioRepository,
+    private readonly eventPublisher: EventPublisher
   ) {}
 
   async execute(dto: CrearEjercicioDto): Promise<string> {
@@ -23,7 +23,6 @@ export class CrearEjercicioUseCase {
     let ejercicioId: string | null = null;
     
     try {
-      // Paso 1: Iniciar SAGA
       await this.eventPublisher.publish(
         new EjercicioCreadoSagaStarted(
           dto.leccionId,
