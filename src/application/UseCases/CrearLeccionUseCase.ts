@@ -11,26 +11,31 @@ export class CrearLeccionUseCase {
   ) {}
 
   async execute(dto: CrearLeccionDto): Promise<string> {
-    const id = crypto.randomUUID();
-    const nivel = NivelDificultad.fromString(dto.nivel);
+    try {
+      const id = crypto.randomUUID();
+      const nivel = NivelDificultad.fromString(dto.nivel);
 
-    const leccion = new Leccion(
-      id,
-      dto.titulo,
-      nivel,
-      dto.contenidoJson,
-      dto.idioma
-    );
+      const leccion = new Leccion(
+        id,
+        dto.titulo,
+        nivel,
+        dto.contenidoJson,
+        dto.idioma
+      );
 
-    await this.leccionRepository.save(leccion);
+      const leccionGuardada = await this.leccionRepository.save(leccion);
+      console.log("Leccion guardada:", leccionGuardada);
+      // Publicar eventos
+      const eventos = leccion.getEventos();
+      for (const evento of eventos) {
+        await this.eventPublisher.publish(evento);
+      }
+      leccion.limpiarEventos();
 
-    // Publicar eventos
-    const eventos = leccion.getEventos();
-    for (const evento of eventos) {
-      await this.eventPublisher.publish(evento);
+      return id;
+    } catch (error) {
+      console.error("Error al crear la leccion:", error);
+      throw error;
     }
-    leccion.limpiarEventos();
-
-    return id;
   }
 }

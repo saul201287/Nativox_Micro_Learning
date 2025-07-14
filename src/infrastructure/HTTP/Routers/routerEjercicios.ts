@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { ejerciciosController } from "../../Dependencies";
-import { authMiddleware } from "../../../shared/Middleware/auth-middleware";
+import { authMiddleware } from "../../../shared/middleware/auth-middleware";
 
 export const routerEjercicios = Router();
 

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { leccionController, leccionQueryController } from "../../Dependencies";
-import { authMiddleware } from "../../../shared/Middleware/auth-middleware";
+import { authMiddleware } from "../../../shared/middleware/auth-middleware";
 
 export const routerLecciones = Router();
 
