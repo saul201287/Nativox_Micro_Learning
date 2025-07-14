@@ -8,6 +8,7 @@ import {
 } from "../Events/DomainEvent";
 import { NivelDificultad } from "../ObjetValues/NivelDificultad";
 import { ResultadoRespuesta } from "../ObjetValues/ResultadoRespuesta";
+import crypto from "crypto";
 
 export class Leccion {
   private readonly ejercicios: Ejercicio[] = [];

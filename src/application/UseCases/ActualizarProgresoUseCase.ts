@@ -10,6 +10,7 @@ import { RespuestaUsuarioRepository } from "../../domain/Ports/RespuestaUsuarioR
 import { ServicioDeProgreso } from "../../domain/Services/ServicioDeProgreso";
 import { ActualizarProgresoCommand } from "../Commands/CommandsEscritura";
 import { ServicioDeNotificaciones } from "../../domain/Services/ServicioDeNotificaciones";
+import crypto from "crypto";
 
 export class ActualizarProgresoUseCase {
   constructor(

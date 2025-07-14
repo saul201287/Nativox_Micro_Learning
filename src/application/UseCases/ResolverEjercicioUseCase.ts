@@ -9,6 +9,7 @@ import { LeccionRepository } from "../../domain/Ports/LeccionRepository";
 import { RespuestaUsuarioRepository } from "../../domain/Ports/RespuestaUsuarioRepository";
 import { ServicioDeEvaluacion } from "../../domain/Services/ServicioDeEvaluacion";
 import { ResolverEjercicioDto } from "../DTOs/ResolverEjercicioDto";
+import crypto from "crypto";
 
 export class ResolverEjercicioUseCase {
   constructor(

@@ -3,6 +3,7 @@ import { NivelDificultad } from "../../domain/ObjetValues/NivelDificultad";
 import { EventPublisher } from "../../domain/Ports/EventPublisher";
 import { LeccionRepository } from "../../domain/Ports/LeccionRepository";
 import { CrearLeccionDto } from "../DTOs/CrearLeccionDto";
+import crypto from "crypto";
 
 export class CrearLeccionUseCase {
   constructor(

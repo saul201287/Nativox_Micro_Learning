@@ -10,6 +10,7 @@ import { EjercicioRepository } from "../../domain/Ports/EjercicioRepository";
 import { EventPublisher } from "../../domain/Ports/EventPublisher";
 import { LeccionRepository } from "../../domain/Ports/LeccionRepository";
 import { CrearEjercicioDto } from "../DTOs/CrearEjercicioDto";
+import crypto from "crypto";
 
 export class CrearEjercicioUseCase {
   constructor(
