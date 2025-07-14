@@ -19,7 +19,7 @@ export class EjercicioEntity {
 
   @Column({
     type: "enum",
-    enum: ["selección", "rellenar", "verdadero_falso", "ordenar"],
+    enum: ["selección", "verdadero_falso", "ordenar", "completar"],
     default: "selección",
   })
   tipo!: string;
