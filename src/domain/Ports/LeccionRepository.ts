@@ -6,4 +6,5 @@ export interface LeccionRepository {
   findById(id: string): Promise<Leccion | null>;
   findByNivel(nivel: NivelDificultad): Promise<Leccion[]>;
   findByIdioma(idioma: string): Promise<Leccion[]>;
+  findAll(): Promise<Leccion[]>;
 }

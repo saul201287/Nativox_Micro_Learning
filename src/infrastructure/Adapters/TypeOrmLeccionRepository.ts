@@ -67,4 +67,19 @@ export class TypeOrmLeccionRepository implements LeccionRepository {
       throw error;
     }
   }
+
+  async findAll(): Promise<Leccion[]> {
+    try {
+      const entities = await this.repository.find({
+        relations: ["ejercicios"],
+        order: {
+          created_at: "ASC"
+        }
+      });
+      return entities.map(LeccionMapper.toDomain);
+    } catch (error) {
+      console.error("Error: ", error);
+      throw error;
+    }
+  }
 }

@@ -27,9 +27,19 @@ export class LeccionQueryController {
       const filtros: FiltrosLeccionDto = req.query;
       const lecciones = await this.listarLeccionesUseCase.execute(filtros);
       
-      res.status(200).json(lecciones);
+      res.status(200).json({
+        success: true,
+        data: lecciones,
+        count: lecciones.length,
+        message: "Lecciones obtenidas exitosamente"
+      });
     } catch (error) {
-      res.status(400).json({ error: error });
+      console.error("Error al listar lecciones:", error);
+      res.status(500).json({ 
+        success: false,
+        error: error instanceof Error ? error.message : "Error interno del servidor",
+        message: "Error al obtener las lecciones"
+      });
     }
   }
 

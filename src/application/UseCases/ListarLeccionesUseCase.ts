@@ -26,7 +26,7 @@ export class ListarLeccionesUseCase {
       return await this.leccionRepository.findByIdioma(filtros.idioma);
     }
 
-    // Si no hay filtros, podríamos implementar findAll con paginación
-    throw new Error("Debe especificar al menos un filtro");
+    // Si no hay filtros, devolver todas las lecciones
+    return await this.leccionRepository.findAll();
   }
 }
