@@ -12,9 +12,9 @@ app.use(morgan("dev"));
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use("/lecciones", routerLecciones);
-app.use("/ejercicios", routerEjercicios);
-app.use("/userResponse", routerUserResponse);
+app.use("/api_learning/lecciones", routerLecciones);
+app.use("/api_learning/ejercicios", routerEjercicios);
+app.use("/api_learning/userResponse", routerUserResponse);
 app.use(
   (
     err: Error,

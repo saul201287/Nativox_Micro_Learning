@@ -1,9 +1,9 @@
 import { EachMessagePayload, Kafka } from 'kafkajs';
 
 export class KafkaClient {
-    private kafka: Kafka;
-    private producer: any;
-    private consumer: any;
+    private readonly kafka: Kafka;
+    private readonly producer: any;
+    private readonly consumer: any;
 
     constructor(brokers: string[]) {
         this.kafka = new Kafka({
