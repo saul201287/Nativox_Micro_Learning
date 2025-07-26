@@ -28,12 +28,17 @@ import { EjercicioController } from "./HTTP/Controllers/EjercicioController";
 import { LeccionQueryController } from "./HTTP/Controllers/LeccionQueryController";
 import { UsuarioController } from "./HTTP/Controllers/UsuarioController";
 import { TypeOrmUsuarioNotificableRepository } from "./Adapters/TypeOrmUsuarioNotificableRepository";
+import { TypeOrmAnaliticaLlmRepository } from "./Adapters/TypeOrmAnaliticaLlmRepository";
 import { EmailNotificationStrategy } from "./Notifications/EmailNotificationStrategy";
 import { PushNotificationStrategy } from "./Notifications/PushNotificationStrategy";
 import { ServicioDeNotificaciones } from "../domain/Services/ServicioDeNotificaciones";
 import { ActualizarProgresoUseCase } from "../application/UseCases/ActualizarProgresoUseCase";
 import { FcmTokenActualizadoConsumer } from "./kafka/FcmTokenActualizadoConsumer";
-  import { UsuarioRegistradoConsumer } from "./kafka/UsuarioRegistradoConsumer";
+import { UsuarioRegistradoConsumer } from "./kafka/UsuarioRegistradoConsumer";
+import { AnaliticaLlmEntity } from "../Config/db/entities/AnaliticaLlmEntity";
+import { CrearAnaliticaLlmUseCase } from "../application/UseCases/CrearAnaliticaLlmUseCase";
+import { ListarAnaliticaLlmUseCase } from "../application/UseCases/ListarAnaliticaLlmUseCase";
+import { AnaliticaLlmController } from "./HTTP/Controllers/AnaliticaLlmController";
 
 dotenv.config();
 
@@ -71,6 +76,7 @@ const kafkaClient = new KafkaClient([process.env.BROKER || 'localhost:9092']);
 const sagaEventHandler = new SagaEventHandler(kafkaClient, sagaCompensationService);
 
 const usuarioNotificableRepository = new TypeOrmUsuarioNotificableRepository(dataSource);
+const analiticaLlmRepository = new TypeOrmAnaliticaLlmRepository(dataSource.getRepository(AnaliticaLlmEntity));
 const emailNotificationStrategy = new EmailNotificationStrategy();
 const pushNotificationStrategy = new PushNotificationStrategy();
 
@@ -132,6 +138,17 @@ const obtenerRespuestasUsuarioUseCase = new ObtenerRespuestasUsuarioUseCase(
 const obtenerEstadisticasLeccionUseCase = new ObtenerEstadisticasLeccionUseCase(
   leccionRepository,
   respuestaRepository
+);
+const crearAnaliticaLlmUseCase = new CrearAnaliticaLlmUseCase(
+  analiticaLlmRepository
+);
+const listarAnaliticaLlmUseCase = new ListarAnaliticaLlmUseCase(
+  analiticaLlmRepository
+);
+
+export const analiticaLlmController = new AnaliticaLlmController(
+  crearAnaliticaLlmUseCase,
+  listarAnaliticaLlmUseCase
 );
 
 export const leccionController = new LeccionController(

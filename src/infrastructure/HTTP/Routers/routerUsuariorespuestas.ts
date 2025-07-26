@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { usuarioController } from "../../Dependencies";
+import { usuarioController, analiticaLlmController } from "../../Dependencies";
 import { authMiddleware } from "../../../shared/Middleware/auth-middleware";
 
 export const routerUserResponse = Router();
@@ -41,3 +41,25 @@ routerUserResponse.get(
       });
   }
 );
+
+routerUserResponse.get("/analiticas_llm", (req, res) => {
+  analiticaLlmController
+    .getAll(req, res)
+    .then((data) => {
+      return data;
+    })
+    .catch((err) => {
+      res.status(500).send({ error: err.message, msg: "Error en el servidor" });
+    });
+});
+
+routerUserResponse.post("/analiticas_llm", (req, res) => {
+  analiticaLlmController
+    .create(req, res)
+    .then((data) => {
+      return data;
+    })
+    .catch((err) => {
+      res.status(500).send({ error: err.message, msg: "Error en el servidor" });
+    });
+});
