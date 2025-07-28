@@ -35,10 +35,10 @@ import { ServicioDeNotificaciones } from "../domain/Services/ServicioDeNotificac
 import { ActualizarProgresoUseCase } from "../application/UseCases/ActualizarProgresoUseCase";
 import { FcmTokenActualizadoConsumer } from "./kafka/FcmTokenActualizadoConsumer";
 import { UsuarioRegistradoConsumer } from "./kafka/UsuarioRegistradoConsumer";
-import { AnaliticaLlmEntity } from "../Config/db/entities/AnaliticaLlmEntity";
 import { CrearAnaliticaLlmUseCase } from "../application/UseCases/CrearAnaliticaLlmUseCase";
 import { ListarAnaliticaLlmUseCase } from "../application/UseCases/ListarAnaliticaLlmUseCase";
 import { AnaliticaLlmController } from "./HTTP/Controllers/AnaliticaLlmController";
+import { CrearAnaliticaLlmAutomaticoUseCase } from "../application/UseCases/CrearAnaliticaLlmAutomaticoUseCase";
 
 dotenv.config();
 
@@ -76,7 +76,7 @@ const kafkaClient = new KafkaClient([process.env.BROKER || 'localhost:9092']);
 const sagaEventHandler = new SagaEventHandler(kafkaClient, sagaCompensationService);
 
 const usuarioNotificableRepository = new TypeOrmUsuarioNotificableRepository(dataSource);
-const analiticaLlmRepository = new TypeOrmAnaliticaLlmRepository(dataSource.getRepository(AnaliticaLlmEntity));
+const analiticaLlmRepository = new TypeOrmAnaliticaLlmRepository(dataSource);
 const emailNotificationStrategy = new EmailNotificationStrategy();
 const pushNotificationStrategy = new PushNotificationStrategy();
 
@@ -145,10 +145,16 @@ const crearAnaliticaLlmUseCase = new CrearAnaliticaLlmUseCase(
 const listarAnaliticaLlmUseCase = new ListarAnaliticaLlmUseCase(
   analiticaLlmRepository
 );
-
+const crearAnaliticaLlmAutomaticoUseCase = new CrearAnaliticaLlmAutomaticoUseCase(
+  analiticaLlmRepository,
+  usuarioNotificableRepository,
+  leccionRepository,
+  respuestaRepository
+);
 export const analiticaLlmController = new AnaliticaLlmController(
   crearAnaliticaLlmUseCase,
-  listarAnaliticaLlmUseCase
+  listarAnaliticaLlmUseCase,
+  crearAnaliticaLlmAutomaticoUseCase
 );
 
 export const leccionController = new LeccionController(

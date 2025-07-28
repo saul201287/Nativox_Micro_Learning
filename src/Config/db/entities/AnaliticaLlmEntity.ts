@@ -1,4 +1,4 @@
-import { Entity, PrimaryColumn, Column, ObjectIdColumn, Generated } from "typeorm";
+import { Entity, PrimaryColumn, Column, Generated } from "typeorm";
 
 @Entity("analitica_llm")
 export class AnaliticaLlmEntity {

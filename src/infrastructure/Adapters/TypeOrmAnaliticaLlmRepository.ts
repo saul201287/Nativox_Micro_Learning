@@ -1,12 +1,26 @@
 import { Repository } from "typeorm";
 import { AnaliticaLlmEntity } from "../../Config/db/entities/AnaliticaLlmEntity";
 import { AnaliticaLlmRepository } from "../../domain/Ports/AnaliticaLlmRepository";
+import { UsuarioNotificableEntity } from "../../Config/db/entities/UsuarioNotificableEntity";
+import { DataSource } from "typeorm";
 
 export class TypeOrmAnaliticaLlmRepository implements AnaliticaLlmRepository {
   private readonly repository: Repository<AnaliticaLlmEntity>;
+  private readonly repositoryUsuarioNotificable: Repository<UsuarioNotificableEntity>;
 
-  constructor(repository: Repository<AnaliticaLlmEntity>) {
-    this.repository = repository;
+  constructor(repository: DataSource) {
+    this.repository = repository.getRepository(AnaliticaLlmEntity);
+    this.repositoryUsuarioNotificable = repository.getRepository(UsuarioNotificableEntity);
+  }
+  async findByUsuarioId(usuarioId: string): Promise<UsuarioNotificableEntity | null> {
+    try {
+      const usuarioNotificable = await this.repositoryUsuarioNotificable.findOne({ where: { usuarioId } });
+      return usuarioNotificable;
+    } catch (error: any) {
+      throw new Error(
+        `Error al buscar usuario notificable por ID: ${error.message}`
+      );
+    }
   }
 
   async create(analitica: AnaliticaLlmEntity): Promise<AnaliticaLlmEntity> {
