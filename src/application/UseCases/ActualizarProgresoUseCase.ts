@@ -42,6 +42,9 @@ export class ActualizarProgresoUseCase {
       const respuestasUsuario = await this.respuestaRepository.findByUsuarioId(
         command.usuarioId
       );
+      if (!respuestasUsuario) {
+        throw new Error(`Respuestas no encontradas para el usuario: ${command.usuarioId}`);
+      }
       const respuestasLeccion = respuestasUsuario.filter((r) =>
         leccion.getEjercicios().some((ej) => ej.getId() === r.getEjercicioId())
       );
@@ -80,7 +83,7 @@ export class ActualizarProgresoUseCase {
         );
       }
     } catch (error) {
-      console.error(`[SAGA] Error en ActualizarProgreso: ${error}`);
+      console.error(`Error en ActualizarProgreso: ${error}`);
       
       await this.eventPublisher.publish(
         new ProgresoActualizadoSagaFailed(

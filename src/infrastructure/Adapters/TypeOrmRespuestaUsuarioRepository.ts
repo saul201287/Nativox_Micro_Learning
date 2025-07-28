@@ -26,7 +26,11 @@ export class TypeOrmRespuestaUsuarioRepository
 
   async findById(id: string): Promise<RespuestaUsuario | null> {
     try {
-      const entity = await this.repository.findOne({ where: { id } });
+      const entity = await this.repository.findOne({ where: { usuario_id:id } });
+      if (!entity) {
+        console.warn(`RespuestaUsuario no encontrada con id: ${id}`);
+        return null;
+      }
       return entity ? RespuestaUsuarioMapper.toDomain(entity) : null;
     } catch (error) {
       console.error("Error: ", error);
