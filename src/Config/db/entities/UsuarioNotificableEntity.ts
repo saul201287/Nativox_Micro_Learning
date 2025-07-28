@@ -13,4 +13,7 @@ export class UsuarioNotificableEntity {
 
   @Column()
   fcmToken!: string;
+
+  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  timestamp!: Date;
 }

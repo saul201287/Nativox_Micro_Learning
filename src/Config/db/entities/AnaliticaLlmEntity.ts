@@ -6,6 +6,9 @@ export class AnaliticaLlmEntity {
   @Generated("uuid")
   uid!: string;
 
+  @Column({ type: "varchar", length: 100 })
+  usuario_id!: string;
+
   @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   fecha_registro!: Date;
 

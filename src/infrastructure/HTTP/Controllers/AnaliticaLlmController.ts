@@ -23,6 +23,7 @@ export class AnaliticaLlmController {
         request.body.total_lecciones_completadas;
       analiticaLlm.ultima_fecha_de_actividad =
         request.body.ultima_fecha_de_actividad;
+      analiticaLlm.usuario_id = request.body.usuario_id;
 
       const analiticaLlmCreada =
         await this.crearAnaliticaLlmUseCase.execute(analiticaLlm);
