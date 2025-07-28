@@ -14,6 +14,12 @@ export class TypeOrmUsuarioNotificableRepository implements UsuarioNotificableRe
   }
 
   async findById(usuarioId: string): Promise<UsuarioNotificableEntity | null> {
-    return await this.repo.findOneBy({ usuarioId });
+   try {
+     return await this.repo.findOneBy({ usuarioId });
+
+   } catch (error) {
+    console.error("Error en busqueda de usuario: ", error);
+    return null;
+   }
   }
 } 
