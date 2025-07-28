@@ -20,12 +20,12 @@ export class ServicioDeNotificaciones {
 
       const titulo = "¡Lección completada!";
       const mensaje = `¡Felicidades ${usuario.nombre}! Has completado la lección ${leccion}. Sigue aprendiendo.`;
+      console.log("enviando email a:", usuario.email);
+      await this.enviarEmail(usuario.email, titulo, mensaje);
       if (usuario.fcmToken != "web_platform_token") {
         console.log("enviando push a:", usuario.fcmToken);
         await this.enviarPush(usuario.fcmToken, titulo, mensaje);
       }
-      console.log("enviando email a:", usuario.email);
-      await this.enviarEmail(usuario.email, titulo, mensaje);
     } catch (error) {
       console.error(`Error al notificar lección completada: ${error}`);
       throw error;
