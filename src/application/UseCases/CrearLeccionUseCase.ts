@@ -13,6 +13,8 @@ export class CrearLeccionUseCase {
 
   async execute(dto: CrearLeccionDto): Promise<string> {
     try {
+      console.log("Ejecutando CrearLeccionUseCase con DTO:", dto.nivel.valueOf());
+      
       const id = crypto.randomUUID();
       const nivel = NivelDificultad.fromString(dto.nivel);
 

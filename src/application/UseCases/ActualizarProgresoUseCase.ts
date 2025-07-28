@@ -1,8 +1,8 @@
 import { ProgresoActualizado } from "../../domain/Events/DomainEvent";
-import { 
+import {
   ProgresoActualizadoSagaStarted,
   ProgresoActualizadoSagaCompleted,
-  ProgresoActualizadoSagaFailed
+  ProgresoActualizadoSagaFailed,
 } from "../../domain/Events/SagaEvents";
 import { EventPublisher } from "../../domain/Ports/EventPublisher";
 import { LeccionRepository } from "../../domain/Ports/LeccionRepository";
@@ -23,7 +23,7 @@ export class ActualizarProgresoUseCase {
 
   async execute(command: ActualizarProgresoCommand): Promise<void> {
     const sagaId = crypto.randomUUID();
-    
+
     try {
       await this.eventPublisher.publish(
         new ProgresoActualizadoSagaStarted(
@@ -51,9 +51,8 @@ export class ActualizarProgresoUseCase {
       ).length;
 
       const totalEjercicios = leccion.getEjercicios().length;
-      const porcentajeAvance = totalEjercicios > 0 
-        ? (respuestasCorrectas / totalEjercicios) * 100 
-        : 0;
+      const porcentajeAvance =
+        totalEjercicios > 0 ? (respuestasCorrectas / totalEjercicios) * 100 : 0;
 
       await this.eventPublisher.publish(
         new ProgresoActualizadoSagaCompleted(
@@ -74,9 +73,12 @@ export class ActualizarProgresoUseCase {
       await this.eventPublisher.publish(event);
 
       if (porcentajeAvance === 100) {
-        await this.servicioDeNotificaciones.notificarLeccionCompletada(command.usuarioId, leccion.getTitulo());
+        console.log("publiando progreso");
+        await this.servicioDeNotificaciones.notificarLeccionCompletada(
+          command.usuarioId,
+          leccion.getTitulo()
+        );
       }
-      
     } catch (error) {
       console.error(`[SAGA] Error en ActualizarProgreso: ${error}`);
       
@@ -89,7 +91,7 @@ export class ActualizarProgresoUseCase {
           sagaId
         )
       );
-        
+
       throw error;
     }
   }

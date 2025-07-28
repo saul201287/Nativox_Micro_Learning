@@ -16,6 +16,8 @@ export class EmailNotificationStrategy {
   }
 
   async sendEmail(to: string, subject: string, body: string): Promise<void> {
+    console.log("enviando email a:", to);
+    
     await this.transporter.sendMail({
       from: process.env.USER_EMAIL ?? "no-reply@microservicio.com",
       to,

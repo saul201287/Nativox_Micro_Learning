@@ -10,6 +10,8 @@ export class NivelDificultad {
   }
 
   static fromString(value: string): NivelDificultad {
+    console.log("Creando NivelDificultad desde string:", value);
+    
     if (value === "basico" || value === "intermedio") {
       return new NivelDificultad(value);
     }

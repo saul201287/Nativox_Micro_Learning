@@ -21,8 +21,8 @@ export class LeccionEntity {
 
   @Column({
     type: "enum",
-    enum: ["tzeltal", "zapoteco"],
-    default: "tzeltal",
+    enum: ["tseltal", "zapoteco"],
+    default: "tseltal",
   })
   idioma!: string;
 

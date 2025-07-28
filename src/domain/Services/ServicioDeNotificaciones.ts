@@ -11,12 +11,14 @@ export class ServicioDeNotificaciones {
 
   async notificarLeccionCompletada(usuarioId: string, leccion: string) {
     const usuario = await this.usuarioRepo.findById(usuarioId);
+    console.log("notificando lección completada a usuario:", usuarioId);
     if (!usuario) return;
 
     const titulo = "¡Lección completada!";
     const mensaje = `¡Felicidades ${usuario.nombre}! Has completado la lección ${leccion}. Sigue aprendiendo.`;
-
-    await this.enviarPush(usuario.fcmToken, titulo, mensaje);
+    if (usuario.fcmToken != null && usuario.fcmToken != "web_platform_token") {
+      await this.enviarPush(usuario.fcmToken, titulo, mensaje);
+    }
     await this.enviarEmail(usuario.email, titulo, mensaje);
   }
 
@@ -25,6 +27,8 @@ export class ServicioDeNotificaciones {
   }
 
   private async enviarEmail(email: string, subject: string, body: string) {
+    console.log("enviando email a:", email);
+    
     await this.emailStrategy.sendEmail(email, subject, body);
   }
 }
