@@ -1,12 +1,15 @@
 import { UsuarioNotificableRepository } from "../Ports/UsuarioNotificableRepository";
 import { EmailNotificationStrategy } from "../../infrastructure/Notifications/EmailNotificationStrategy";
 import { PushNotificationStrategy } from "../../infrastructure/Notifications/PushNotificationStrategy";
+import { EventPublisher } from "../Ports/EventPublisher";
+import { NotificacionEnviadaEvent } from "../Events/NotificacionEnviadaEvent";
 
 export class ServicioDeNotificaciones {
   constructor(
     private readonly usuarioRepo: UsuarioNotificableRepository,
     private readonly emailStrategy: EmailNotificationStrategy,
-    private readonly pushStrategy: PushNotificationStrategy
+    private readonly pushStrategy: PushNotificationStrategy,
+    private readonly eventPublisher: EventPublisher
   ) {}
 
   async notificarLeccionCompletada(usuarioId: string, leccion: string) {
@@ -21,10 +24,32 @@ export class ServicioDeNotificaciones {
       const titulo = "¡Lección completada!";
       const mensaje = `¡Felicidades ${usuario.nombre}! Has completado la lección ${leccion}. Sigue aprendiendo.`;
       console.log("enviando email a:", usuario.email);
+  
       await this.enviarEmail(usuario.email, titulo, mensaje);
-      if (usuario.fcmToken != "web_platform_token") {
+      
+      const emailEvent = new NotificacionEnviadaEvent(
+        usuarioId,
+        usuarioId,
+        titulo,
+        mensaje,
+        'email',
+        { leccion, email: usuario.email }
+      );
+      await this.eventPublisher.publish(emailEvent);
+
+      if (usuario.fcmToken && usuario.fcmToken !== "web_platform_token") {
         console.log("enviando push a:", usuario.fcmToken);
         await this.enviarPush(usuario.fcmToken, titulo, mensaje);
+      
+        const pushEvent = new NotificacionEnviadaEvent(
+          usuarioId,
+          usuarioId,
+          titulo,
+          mensaje,
+          'push',
+          { leccion, fcmToken: usuario.fcmToken }
+        );
+        await this.eventPublisher.publish(pushEvent);
       }
     } catch (error) {
       console.error(`Error al notificar lección completada: ${error}`);
